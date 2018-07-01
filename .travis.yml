@@ -8,10 +8,8 @@ osx_image: xcode6.4
 
 env:
   matrix:
-    
-    - CONDA_PERL=5.20.3.1  CONDA_PY=27
-    - CONDA_PERL=5.22.0.1  CONDA_PY=27
-    - CONDA_PERL=5.22.2.1  CONDA_PY=27
+    - CONFIG=osx_python2.7
+
   global:
     # The BINSTAR_TOKEN secure variable. This is defined canonically in conda-forge.yml.
     - secure: "ITfOKnwFQdQrxbmNIyj+Z/pFMpC38E+qJtjacY7lCmarPuuVKqbI5JCPmBo2/zpfysK2TcFO8yEI2JUI8k92vvIaKuc5A5lOTcV/B9vW//re/rXhKNPW0qvhejSIbtIlM2auqyJWM0Fr9+TlZ3nuOY9ge/Kil+id3aZodVFiCrxWArFyXPnAIe7vOrtCCbV/aaMLSvB2PbtNgEIaILQ8i3OrgK56xZ9EPvdRlW3pfWk2IX7p5naFM/jLgnzMR7tcemUEMAU02gUo86vm+xrhlZIUWhvX1E/gbMAk/lr4lZUiFsLODEP11Oai6WryxwnVcVbggC6IpTstKPChBD8mfuIWiNi7OainKZ3vGDJibhKMuMKSb9a6Y164iZudCIEMaLI13S9/oirjOe/3IQBw9O3xx4oqHs81vj3oiqzgUCZqPGEUG6bTiXF1ozBJxM2N//gFjxUW2DbYe+p7N3OfI63+wEy5D/7SCCOmrnTdMwu1HPRpvsw0qsfcBYAuk/0XmafOUOnvnk8MBRrBLpVBQ+cpG/kVWGvgJZNatLMalZXkA1JnNo4ByRmwb7y937vQWj0y+Rl1LZ5ZavTyaAM0vsLMh9zGKOxmDrRJbohcLrWpEN98nHMN6pGwNUsQIwUd4B1TQGG96AxP0odF5Gb6ku2cRxBVLNBCjPkS/QVv8RY="
@@ -20,7 +18,7 @@ env:
 before_install:
     # Fast finish the PR.
     - |
-      (curl https://raw.githubusercontent.com/conda-forge/conda-forge-build-setup-feedstock/master/recipe/ff_ci_pr_build.py | \
+      (curl https://raw.githubusercontent.com/conda-forge/conda-forge-ci-setup-feedstock/master/recipe/ff_ci_pr_build.py | \
           python - -v --ci "travis" "${TRAVIS_REPO_SLUG}" "${TRAVIS_BUILD_NUMBER}" "${TRAVIS_PULL_REQUEST}") || exit 1
 
     # Remove homebrew.
@@ -52,10 +50,10 @@ install:
       conda config --add channels defaults
       conda config --add channels conda-forge
       conda config --set show_channel_urls true
-      conda install --yes --quiet conda-forge-build-setup
+      conda install --yes --quiet conda-forge-ci-setup=1
       source run_conda_forge_build_setup
 
 script:
-  - conda build ./recipe
+  - conda build ./recipe -m ./.ci_support/${CONFIG}.yaml
 
-  - upload_or_check_non_existence ./recipe conda-forge --channel=main
+  - upload_or_check_non_existence ./recipe conda-forge --channel=main -m ./.ci_support/${CONFIG}.yaml
